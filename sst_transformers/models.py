@@ -1,10 +1,13 @@
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification, BertConfig
 import torch
 
 
-def load_transformer(name):
+def load_transformer(name, binary):
     if name == 'bert':
-        return {'model': BertForSequenceClassification.from_pretrained('bert-base-uncased'),
+        config = BertConfig.from_pretrained('bert-base-uncased')
+        if not binary:
+            config.num_labels = 5
+        return {'model': BertForSequenceClassification.from_pretrained('bert-base-uncased', config=config),
                 'tokenizer': BertTokenizer.from_pretrained('bert-base-uncased')}
     else:
         raise ValueError
