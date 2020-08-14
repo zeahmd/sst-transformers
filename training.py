@@ -75,9 +75,15 @@ def eval_epoch(model, eval_dataset, criterion, batch_size, split):
 
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset)
 
-def train(model, train_dataset, dev_dataset, criterion, optimizer, num_epochs=25):
+def train(name, optim, num_epochs=25):
     #best_model_wts = copy.deepcopy(model.state_dict())
     #best_acc = 0.0
+
+    model = load_transformer(name)['model']
+    tokenizer = load_transformer(name)['tokenizer']
+
+    batch_size = transformer_params(name)['batch_size']
+    learning_rate = transformer_params(name)['learning_rate']
 
     for epoch in range(num_epochs):
 
