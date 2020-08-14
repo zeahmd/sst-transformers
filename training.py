@@ -8,8 +8,8 @@ from tqdm import tqdm
 from math import ceil
 import copy
 
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 def train_step(model, inputs, labels, optimizer):
     optimizer.zero_grad()
@@ -58,6 +58,8 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
 
     correct_count = 0
     total_loss = 0
+    y_pred = list()
+    y_true = list()
 
     model.eval()
     with torch.no_grad():
@@ -69,14 +71,17 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
                 logits, loss = eval_step(model, text, sentiment)
 
                 preds = torch.argmax(logits, axis=1)
+                y_pred += preds.cpu().numpy().tolist()
+                y_true += sentiment.cpu().numpy().tolist()
+
                 correct_count += (preds == sentiment).sum().item()
                 total_loss = loss.item()
                 pbar.update(1)
 
+    metrics_score = evaluation_metrics(y_true, y_pred, split=split)
+    return correct_count / len(eval_dataset), total_loss / len(eval_dataset), metrics_score
 
-    return correct_count / len(eval_dataset), total_loss / len(eval_dataset)
-
-def train(name, root, binary,  optim, num_epochs=25):
+def train(name, root, binary, epochs=25, patience=3, save=False):
     #best_model_wts = copy.deepcopy(model.state_dict())
     #best_acc = 0.0
 
@@ -98,16 +103,16 @@ def train(name, root, binary,  optim, num_epochs=25):
     #Intialize optimizer..
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
 
-        print('Epoch {}/{}'.format(epoch + 1, num_epochs))
+        print('Epoch {}/{}'.format(epoch + 1, epochs))
         print('-' * 10)
 
         train_acc, train_loss = train_epoch(model, tokenizer, train_dataset,
                                             optimizer, batch_size)
         print("train_acc: {:.4f}, train_loss: {:.4f}".format(train_acc, train_loss))
 
-        dev_acc, dev_loss = eval_epoch(model, tokenizer, dev_dataset,
+        dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset,
                                        batch_size)
         print("dev_acc: {:.4f}, dev_loss: {:.4f}".format(dev_acc, dev_loss))
 
