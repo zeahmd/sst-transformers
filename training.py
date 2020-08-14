@@ -4,6 +4,7 @@ from sst_transformers.models import load_transformer
 from sst_transformers.utils import transformer_params
 from utils import evaluation_metrics
 from tqdm import tqdm
+from math import ceil
 import copy
 
 
@@ -35,20 +36,22 @@ def train_epoch(model, train_dataset, criterion, optimizer, batch_size):
     total_loss = 0
 
     model.train()
-    for imgs, labels in train_loader:
-        imgs = imgs.to(device)
-        labels = labels.to(device)
+    with tqdm(total=ceil(len(train_dataset)/batch_size), desc='train', unit='batch') as pbar:
+        for imgs, labels in train_loader:
+            imgs = imgs.to(device)
+            labels = labels.to(device)
 
-        preds, loss = train_step(model, imgs, labels, criterion, optimizer)
+            preds, loss = train_step(model, imgs, labels, criterion, optimizer)
 
-        preds = torch.argmax(preds, axis=1)
-        correct_count += (preds == labels).sum().item()
-        total_loss += loss.item()
+            preds = torch.argmax(preds, axis=1)
+            correct_count += (preds == labels).sum().item()
+            total_loss += loss.item()
+            pbar.update(1)
 
     return correct_count / len(train_dataset), total_loss / len(train_dataset)
 
-def eval_epoch(model, dev_dataset, criterion, batch_size):
-    dev_loader = DataLoader(dataset=dev_dataset,
+def eval_epoch(model, eval_dataset, criterion, batch_size, split):
+    eval_loader = DataLoader(dataset=eval_dataset,
                             batch_size=batch_size,
                             shuffle=True)
 
@@ -57,21 +60,24 @@ def eval_epoch(model, dev_dataset, criterion, batch_size):
 
     model.eval()
     with torch.no_grad():
-        for imgs, labels in dev_loader:
-            imgs = imgs.to(device)
-            labels = labels.to(device)
+        with tqdm(total=ceil(len(eval_dataset)/batch_size), desc=split, unit='batch') as pbar:
+            for imgs, labels in eval_loader:
+                imgs = imgs.to(device)
+                labels = labels.to(device)
 
-            preds, loss = eval_step(model, imgs, labels, criterion)
+                preds, loss = eval_step(model, imgs, labels, criterion)
 
-            preds = torch.argmax(preds, axis=1)
-            correct_count += (preds == labels).sum().item()
-            total_loss = loss.item()
+                preds = torch.argmax(preds, axis=1)
+                correct_count += (preds == labels).sum().item()
+                total_loss = loss.item()
+                pbar.update(1)
 
-    return correct_count / len(dev_dataset), total_loss / len(dev_dataset)
+
+    return correct_count / len(eval_dataset), total_loss / len(eval_dataset)
 
 def train(model, train_dataset, dev_dataset, criterion, optimizer, num_epochs=25):
-    best_model_wts = copy.deepcopy(model.state_dict())
-    best_acc = 0.0
+    #best_model_wts = copy.deepcopy(model.state_dict())
+    #best_acc = 0.0
 
     for epoch in range(num_epochs):
 
