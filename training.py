@@ -1,4 +1,5 @@
 import torch
+from sst_transformers.dataset import SSTDataset
 from torch.utils.data import DataLoader
 from sst_transformers.models import load_transformer
 from sst_transformers.utils import transformer_params
@@ -75,15 +76,26 @@ def eval_epoch(model, eval_dataset, criterion, batch_size, split):
 
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset)
 
-def train(name, optim, num_epochs=25):
+def train(name, root, binary,  optim, num_epochs=25):
     #best_model_wts = copy.deepcopy(model.state_dict())
     #best_acc = 0.0
 
+    #load model and tokenizer..
     model = load_transformer(name)['model']
     tokenizer = load_transformer(name)['tokenizer']
 
+    #load batch_size and learning rate..
     batch_size = transformer_params(name)['batch_size']
     learning_rate = transformer_params(name)['learning_rate']
+
+    #load train, dev and test datasets..
+    train_dataset = SSTDataset(root=root, binary=binary, split='train')
+    dev_dataset = SSTDataset(root=root, binary=binary, split='dev')
+    test_dataset = SSTDataset(root=root, binary=binary, split='test')
+
+    #Intialize loss function and optimizer..
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
 
@@ -91,11 +103,11 @@ def train(name, optim, num_epochs=25):
         print('-' * 10)
 
         train_acc, train_loss = train_epoch(model, train_dataset, criterion,
-                                            optimizer, BATCH_SIZE)
+                                            optimizer, batch_size)
         print("train_acc: {:.4f}, train_loss: {:.4f}".format(train_acc, train_loss))
 
         dev_acc, dev_loss = eval_epoch(model, dev_dataset, criterion,
-                                       BATCH_SIZE)
+                                       batch_size)
         print("dev_acc: {:.4f}, dev_loss: {:.4f}".format(dev_acc, dev_loss))
 
         if dev_acc > best_acc:
