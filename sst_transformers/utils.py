@@ -6,3 +6,6 @@ def get_binary_label(sentiment):
     else:
         return 1
 
+def transformer_params(name):
+    pass
+

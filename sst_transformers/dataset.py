@@ -12,7 +12,7 @@ class SSTDataset(object):
         except KeyError:
             logger.error("Invalid split key!")
 
-        logger.info("Preparing dataset!")
+        logger.info(f"Preparing dataset config root: {root}, binary: {binary}, split: {split}!")
         self.text, self.sentiment = list(), list()
         if root:
             if binary:
