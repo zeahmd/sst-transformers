@@ -1,0 +1,12 @@
+# ignore all pycache files...
+__pycache__/
+
+# ignore edistor files
+.vscode/
+.idea/
+
+# ignore venv files
+venv/
+
+# ignore trained torch models
+trained/
