@@ -138,6 +138,7 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
         #save best model and delete previous ones...
         if save:
             if test_acc > best_acc:
+                best_acc = test_acc
                 phrase_type, label = root_and_binary_title(root, binary)
                 model_name = "{}_{}_{}_{}.pickle".format(name, phrase_type, label, epoch)
                 save_model(model, model_name, best_model_name)
