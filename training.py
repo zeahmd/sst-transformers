@@ -53,7 +53,6 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
             correct_count += (preds == sentiment).sum().item()
             total_loss += loss.item()
             pbar.update(1)
-            break
 
     return correct_count / len(train_dataset), total_loss / len(train_dataset)
 
@@ -84,7 +83,6 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
                 correct_count += (preds == sentiment).sum().item()
                 total_loss = loss.item()
                 pbar.update(1)
-                break
 
     metrics_score = evaluation_metrics(y_true, y_pred, split=split)
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset), metrics_score
