@@ -51,7 +51,6 @@ class SSTDataset(object):
                         self.sentiment.append(
                             subtree[0]
                         )
-        logger.info("Done with data preparation!")
 
     def __len__(self):
         return len(self.text)

@@ -15,7 +15,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def train_step(model, inputs, labels, optimizer):
     optimizer.zero_grad()
 
-    outputs = model(inputs=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
+    outputs = model(inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
     loss, logits = outputs[:2]
 
     loss.backward()
@@ -25,7 +25,7 @@ def train_step(model, inputs, labels, optimizer):
 
 
 def eval_step(model, inputs, labels):
-    outputs = model(inputs=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
+    outputs = model(inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
     loss, logits = outputs[:2]
 
     return logits, loss
@@ -91,6 +91,7 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
     #load model and tokenizer..
     transformer_container = load_transformer(name, binary)
     model = transformer_container['model']
+    model = model.to(device)
     tokenizer = transformer_container['tokenizer']
 
     #load batch_size and learning rate..
@@ -120,7 +121,7 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
         dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
         logger.info(f"epoch: {epoch}, transformer: {name}, dev_loss: {dev_loss:.4f}, dev_acc: {dev_acc*100:.2f}")
 
-        test_acc, test_loss, test_evaluation_metrics = eval_epoch(model, tokenizer, dev_dataset,
+        test_acc, test_loss, test_evaluation_metrics = eval_epoch(model, tokenizer, test_dataset,
                                                                   batch_size, 'test')
         logger.info(f"epoch: {epoch}, transformer: {name}, test_loss: {test_loss:.4f}, test_acc: {test_acc*100:.2f}")
         logger.info(f"epoch: {epoch}, transformer: {name}, "
