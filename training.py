@@ -81,7 +81,7 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
                 y_true += sentiment.cpu().numpy().tolist()
 
                 correct_count += (preds == sentiment).sum().item()
-                total_loss = loss.item()
+                total_loss += loss.item()
                 pbar.update(1)
 
     metrics_score = evaluation_metrics(y_true, y_pred, split=split)
