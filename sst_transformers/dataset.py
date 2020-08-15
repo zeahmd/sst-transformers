@@ -10,9 +10,8 @@ class SSTDataset(object):
     def __init__(self, root, binary, split):
         logger.info("Loading sst dataset!")
         try:
-            sst = pytreebank.import_tree_corpus(join('sst_transformers',
-                                                join('trees', split+'.txt')))
-        except FileNotFoundError:
+            sst = pytreebank.load_sst()[split]
+        except KeyError:
             logger.error("Invalid split!")
             os._exit(0)
 
