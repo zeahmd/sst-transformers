@@ -120,11 +120,11 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
         dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
         logger.info(f"epoch: {epoch}, transformer: {name}, dev_loss: {dev_loss:.4f}, dev_acc: {dev_acc*100:.2f}")
 
-
         test_acc, test_loss, test_evaluation_metrics = eval_epoch(model, tokenizer, dev_dataset,
                                                                   batch_size, 'test')
         logger.info(f"epoch: {epoch}, transformer: {name}, test_loss: {test_loss:.4f}, test_acc: {test_acc*100:.2f}")
-        logger.info(f"epoch: {epoch}, transformer: {name}, test_precision: {test_evaluation_metrics['test_precision']}, "
+        logger.info(f"epoch: {epoch}, transformer: {name}, "
+                    f"test_precision: {test_evaluation_metrics['test_precision']}, "
                     f"test_recall: {test_evaluation_metrics['test_recall']}, "
                     f"test_f1_score: {test_evaluation_metrics['test_f1_score']}, "
                     f"test_accuracy_score: {test_evaluation_metrics['test_accuracy']}")
