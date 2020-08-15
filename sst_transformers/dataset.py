@@ -2,15 +2,19 @@ import pytreebank
 from loguru import logger
 from sst_transformers.utils import get_binary_label
 from sst_transformers.preprocessing import preprocess_sst
+from os.path import join
+import os
 
 
 class SSTDataset(object):
     def __init__(self, root, binary, split):
         logger.info("Loading sst dataset!")
         try:
-            sst = pytreebank.load_sst()[split]
-        except KeyError:
-            logger.error("Invalid split key!")
+            sst = pytreebank.import_tree_corpus(join('sst_transformers',
+                                                join('trees', split+'.txt')))
+        except FileNotFoundError:
+            logger.error("Invalid split!")
+            os._exit(0)
 
         logger.info(f"Preparing dataset config root: {root}, binary: {binary}, split: {split}!")
         self.text, self.sentiment = list(), list()
