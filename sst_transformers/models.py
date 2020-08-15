@@ -1,5 +1,4 @@
 from transformers import BertTokenizer, BertForSequenceClassification, BertConfig
-import torch
 
 
 def load_transformer(name, binary):

@@ -6,6 +6,7 @@ def get_binary_label(sentiment):
     else:
         return 1
 
+
 def transformer_params(name):
     if name == 'bert':
         return {'batch_size': 32,

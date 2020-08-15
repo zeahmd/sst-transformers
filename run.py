@@ -23,6 +23,5 @@ def run(name, root, binary, epochs, patience, save):
     train(name, root, binary, epochs, patience, save)
 
 
-
 if __name__ == "__main__":
     run()

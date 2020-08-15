@@ -3,10 +3,11 @@ from sst_transformers.dataset import SSTDataset
 from torch.utils.data import DataLoader
 from sst_transformers.models import load_transformer
 from sst_transformers.utils import transformer_params
-from utils import evaluation_metrics
+from utils import evaluation_metrics, save_model, root_and_binary_title
 from tqdm import tqdm
 from math import ceil
-import copy
+from loguru import logger
+import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -22,11 +23,13 @@ def train_step(model, inputs, labels, optimizer):
 
     return logits, loss
 
+
 def eval_step(model, inputs, labels):
     outputs = model(inputs=inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
     loss, logits = outputs[:2]
 
     return logits, loss
+
 
 def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
     train_loader = DataLoader(dataset=train_dataset,
@@ -50,6 +53,7 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
             pbar.update(1)
 
     return correct_count / len(train_dataset), total_loss / len(train_dataset)
+
 
 def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
     eval_loader = DataLoader(dataset=eval_dataset,
@@ -81,9 +85,8 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
     metrics_score = evaluation_metrics(y_true, y_pred, split=split)
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset), metrics_score
 
+
 def train(name, root, binary, epochs=25, patience=3, save=False):
-    #best_model_wts = copy.deepcopy(model.state_dict())
-    #best_acc = 0.0
 
     #load model and tokenizer..
     transformer_container = load_transformer(name, binary)
@@ -103,22 +106,47 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
     #Intialize optimizer..
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+    #Initialize training variables..
+    best_acc = 0.0
+    best_loss = np.inf
+    stopping_step = 0
+    best_model_name = None
+
     for epoch in range(epochs):
 
-        print('Epoch {}/{}'.format(epoch + 1, epochs))
-        print('-' * 10)
+        train_acc, train_loss = train_epoch(model, tokenizer, train_dataset, optimizer, batch_size)
+        logger.info(f"epoch: {epoch}, transformer: {name}, train_loss: {train_loss:.4f}, train_acc: {train_acc*100:.2f}")
 
-        train_acc, train_loss = train_epoch(model, tokenizer, train_dataset,
-                                            optimizer, batch_size)
-        print("train_acc: {:.4f}, train_loss: {:.4f}".format(train_acc, train_loss))
+        dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
+        logger.info(f"epoch: {epoch}, transformer: {name}, dev_loss: {dev_loss:.4f}, dev_acc: {dev_acc*100:.2f}")
 
-        dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset,
-                                       batch_size)
-        print("dev_acc: {:.4f}, dev_loss: {:.4f}".format(dev_acc, dev_loss))
 
-        if dev_acc > best_acc:
-            best_acc = dev_acc
-            best_model_wts = copy.deepcopy(model.state_dict())
+        test_acc, test_loss, test_evaluation_metrics = eval_epoch(model, tokenizer, dev_dataset,
+                                                                  batch_size, 'test')
+        logger.info(f"epoch: {epoch}, transformer: {name}, test_loss: {test_loss:.4f}, test_acc: {test_acc*100:.2f}")
+        logger.info(f"epoch: {epoch}, transformer: {name}, test_precision: {test_evaluation_metrics['test_precision']}, "
+                    f"test_recall: {test_evaluation_metrics['test_recall']}, "
+                    f"test_f1_score: {test_evaluation_metrics['test_f1_score']}, "
+                    f"test_accuracy_score: {test_evaluation_metrics['test_accuracy']}")
+        logger.info(f"epoch: {epoch}, transformer: {name}, test_confusion_matrix: \n"
+                    f"{test_evaluation_metrics['test_confusion_matrix']}")
 
-    model.load_state_dict(best_model_wts)
-    return model
+
+        #save best model and delete previous ones...
+        if save:
+            if test_acc > best_acc:
+                phrase_type, label = root_and_binary_title(root, binary)
+                model_name = "{}_{}_{}_{}.pickle".format(name, phrase_type, label, epoch)
+                save_model(model, model_name, best_model_name)
+
+
+        # Implement early stopping here
+        if test_loss < best_loss:
+            best_loss = test_loss
+            stopping_step = 0
+        else:
+            stopping_step += 1
+
+        if stopping_step >= patience:
+            logger.info("EarlyStopping!")
+
