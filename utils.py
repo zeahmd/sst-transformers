@@ -11,7 +11,7 @@ def evaluation_metrics(Y_true, Y_pred, split='test'):
     metrics[split+'_precision'] = precision_score(Y_true, Y_pred, average='macro')
     metrics[split+'_recall'] = recall_score(Y_true, Y_pred, average='macro')
     metrics[split+'_f1_score'] = f1_score(Y_true, Y_pred, average='macro')
-    metrics[split+'confusion_matrix'] = confusion_matrix(Y_true, Y_pred)
+    metrics[split+'_confusion_matrix'] = confusion_matrix(Y_true, Y_pred)
 
     return metrics
 

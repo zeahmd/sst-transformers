@@ -15,6 +15,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def train_step(model, inputs, labels, optimizer):
     optimizer.zero_grad()
 
+    labels = labels.unsqueeze(0)
     outputs = model(inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
     loss, logits = outputs[:2]
 
@@ -25,6 +26,7 @@ def train_step(model, inputs, labels, optimizer):
 
 
 def eval_step(model, inputs, labels):
+    labels = labels.unsqueeze(0)
     outputs = model(inputs['input_ids'], attention_mask=inputs['attention_mask'], labels=labels)
     loss, logits = outputs[:2]
 
@@ -43,7 +45,7 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
     with tqdm(total=ceil(len(train_dataset)/batch_size), desc='train', unit='batch') as pbar:
         for text, sentiment in train_loader:
             text = tokenizer(text, padding=True, return_tensors='pt').to(device)
-            sentiment = torch.tensor(sentiment).unsqueeze(0).to(device)
+            sentiment = sentiment.to(device)
 
             logits, loss = train_step(model, text, sentiment, optimizer)
 
@@ -51,6 +53,7 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
             correct_count += (preds == sentiment).sum().item()
             total_loss += loss.item()
             pbar.update(1)
+            break
 
     return correct_count / len(train_dataset), total_loss / len(train_dataset)
 
@@ -70,7 +73,7 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
         with tqdm(total=ceil(len(eval_dataset)/batch_size), desc=split, unit='batch') as pbar:
             for text, sentiment in eval_loader:
                 text = tokenizer(text, padding=True, return_tensors='pt').to(device)
-                sentiment = torch.tensor(sentiment).unsqueeze(0).to(device)
+                sentiment = sentiment.to(device)
 
                 logits, loss = eval_step(model, text, sentiment)
 
@@ -81,6 +84,7 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
                 correct_count += (preds == sentiment).sum().item()
                 total_loss = loss.item()
                 pbar.update(1)
+                break
 
     metrics_score = evaluation_metrics(y_true, y_pred, split=split)
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset), metrics_score
@@ -116,20 +120,20 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
     for epoch in range(epochs):
 
         train_acc, train_loss = train_epoch(model, tokenizer, train_dataset, optimizer, batch_size)
-        logger.info(f"epoch: {epoch}, transformer: {name}, train_loss: {train_loss:.4f}, train_acc: {train_acc*100:.2f}")
+        logger.info(f"epoch: {epoch+1}, transformer: {name}, train_loss: {train_loss:.4f}, train_acc: {train_acc*100:.2f}")
 
         dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
-        logger.info(f"epoch: {epoch}, transformer: {name}, dev_loss: {dev_loss:.4f}, dev_acc: {dev_acc*100:.2f}")
+        logger.info(f"epoch: {epoch+1}, transformer: {name}, dev_loss: {dev_loss:.4f}, dev_acc: {dev_acc*100:.2f}")
 
         test_acc, test_loss, test_evaluation_metrics = eval_epoch(model, tokenizer, test_dataset,
                                                                   batch_size, 'test')
-        logger.info(f"epoch: {epoch}, transformer: {name}, test_loss: {test_loss:.4f}, test_acc: {test_acc*100:.2f}")
-        logger.info(f"epoch: {epoch}, transformer: {name}, "
-                    f"test_precision: {test_evaluation_metrics['test_precision']}, "
-                    f"test_recall: {test_evaluation_metrics['test_recall']}, "
-                    f"test_f1_score: {test_evaluation_metrics['test_f1_score']}, "
-                    f"test_accuracy_score: {test_evaluation_metrics['test_accuracy']}")
-        logger.info(f"epoch: {epoch}, transformer: {name}, test_confusion_matrix: \n"
+        logger.info(f"epoch: {epoch+1}, transformer: {name}, test_loss: {test_loss:.4f}, test_acc: {test_acc*100:.2f}")
+        logger.info(f"epoch: {epoch+1}, transformer: {name}, "
+                    f"test_precision: {test_evaluation_metrics['test_precision']*100:.2f}, "
+                    f"test_recall: {test_evaluation_metrics['test_recall']*100:.2f}, "
+                    f"test_f1_score: {test_evaluation_metrics['test_f1_score']*100:.2f}, "
+                    f"test_accuracy_score: {test_evaluation_metrics['test_accuracy']*100:.2f}")
+        logger.info(f"epoch: {epoch+1}, transformer: {name}, test_confusion_matrix: \n"
                     f"{test_evaluation_metrics['test_confusion_matrix']}")
 
 
