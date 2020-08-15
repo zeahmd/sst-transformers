@@ -5,7 +5,7 @@ from training import train
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("-n", "--name", default='lstm', help='model name')
+@click.option("-n", "--name", default='bert', help='model name')
 @click.option("-r", "--root", is_flag=True, help='SST root or all')
 @click.option("-b", "--binary", is_flag=True, help='SST binary or fine')
 @click.option("-e", "--epochs", default=30, help="no of training iterations/epochs")
