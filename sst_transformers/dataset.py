@@ -8,7 +8,6 @@ import os
 
 class SSTDataset(object):
     def __init__(self, root, binary, split):
-        logger.info("Loading sst dataset!")
         try:
             sst = pytreebank.load_sst()[split]
         except KeyError:
