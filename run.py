@@ -13,12 +13,34 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option("-s", "--save", is_flag=True, help="save model")
 def run(name, root, binary, epochs, patience, save):
     """
-    SST Transformers:\n
-    -----------\n
-    root: only root sentences\n
-    all: sentences parsed into phrases\n
-    binary: only rows with sentiment negative, positive\n
-    fine: negative, partially negative, neutral, partially positive, positive\n
+    \b
+    SST Transformers
+    ----------------\n
+    \b
+    Transformer Models:
+    1- bert-base
+    2- bert-large
+    3- roberta-base
+    4- roberta-large
+    5- distilbert
+    6- albert-xlarge
+    7- albert-xxlarge
+    8- xlmroberta-base
+    9- xlmroberta-large
+    10- electra-small
+    11- electra-large
+    12- mobilebert
+    13- gpt2-medium
+
+    \b
+    Dataset Details:
+    root: only root sentences
+    all: sentences parsed into phrases
+    binary: only rows with sentiment negative, positive
+    fine: negative, partially negative, neutral, partially positive, positive
+
+    \b
+    Note: name parameter can take one of above models only.
     """
     train(name, root, binary, epochs, patience, save)
 
