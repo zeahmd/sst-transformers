@@ -6,9 +6,10 @@ from transformers import XLMRobertaTokenizer, XLMRobertaForSequenceClassificatio
 from transformers import ElectraTokenizer, ElectraForSequenceClassification, ElectraConfig
 from transformers import MobileBertTokenizer, MobileBertForSequenceClassification, MobileBertConfig
 from transformers import GPT2Tokenizer, GPT2Model, GPT2Config
-
+from loguru import logger
 
 def load_transformer(name, binary):
+    logger.info(f"Loading model {name}!")
     if name == 'bert-base':
         config = BertConfig.from_pretrained('bert-base-uncased')
         if not binary:
