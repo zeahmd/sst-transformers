@@ -8,6 +8,7 @@ from tqdm import tqdm
 from math import ceil
 from loguru import logger
 import numpy as np
+import os
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -91,7 +92,11 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
 def train(name, root, binary, epochs=25, patience=3, save=False):
 
     #load model and tokenizer..
-    transformer_container = load_transformer(name, binary)
+    try:
+        transformer_container = load_transformer(name, binary)
+    except ValueError:
+        logger.error("Invalid transformer name!")
+        os._exit(0)
     model = transformer_container['model']
     model = model.to(device)
     tokenizer = transformer_container['tokenizer']
