@@ -3,6 +3,8 @@ from sst_transformers.dataset import SSTDataset
 from torch.utils.data import DataLoader
 from sst_transformers.models import load_transformer
 from sst_transformers.utils import transformer_params
+from transformers import AdamW
+from transformers import get_linear_schedule_with_warmup
 from utils import evaluation_metrics, save_model, root_and_binary_title
 from tqdm import tqdm
 from math import ceil
@@ -13,7 +15,7 @@ import os
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train_step(model, inputs, labels, optimizer):
+def train_step(model, inputs, labels, optimizer, scheduler):
     optimizer.zero_grad()
 
     labels = labels.unsqueeze(0)
@@ -22,6 +24,7 @@ def train_step(model, inputs, labels, optimizer):
 
     loss.backward()
     optimizer.step()
+    scheduler.step()
 
     return logits, loss
 
@@ -34,7 +37,7 @@ def eval_step(model, inputs, labels):
     return logits, loss
 
 
-def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
+def train_epoch(model, tokenizer, train_dataset, optimizer, scheduler, batch_size):
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=batch_size,
                               shuffle=True)
@@ -48,7 +51,7 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, batch_size):
             text = tokenizer(text, padding=True, return_tensors='pt').to(device)
             sentiment = sentiment.to(device)
 
-            logits, loss = train_step(model, text, sentiment, optimizer)
+            logits, loss = train_step(model, text, sentiment, optimizer, scheduler)
 
             preds = torch.argmax(logits, axis=1)
             correct_count += (preds == sentiment).sum().item()
@@ -112,7 +115,12 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
     test_dataset = SSTDataset(root=root, binary=binary, split='test')
 
     #Intialize optimizer..
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = AdamW(model.parameters(), lr=learning_rate)
+
+    #Intialize learning rate scheduler..
+    num_train_steps = ceil(len(train_dataset)/batch_size)
+    num_warmup_steps = ceil((len(train_dataset)/batch_size)*0.4) #use 40% steps as warmup...
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_train_steps)
 
     #Initialize training variables..
     best_acc = 0.0
@@ -122,7 +130,7 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
 
     for epoch in range(epochs):
 
-        train_acc, train_loss = train_epoch(model, tokenizer, train_dataset, optimizer, batch_size)
+        train_acc, train_loss = train_epoch(model, tokenizer, train_dataset, optimizer, scheduler, batch_size)
         logger.info(f"epoch: {epoch+1}, transformer: {name}, train_loss: {train_loss:.4f}, train_acc: {train_acc*100:.2f}")
 
         dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
