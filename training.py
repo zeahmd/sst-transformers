@@ -44,6 +44,7 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, scheduler, batch_siz
 
     correct_count = 0
     total_loss = 0
+    sample_processed = 0
 
     model.train()
     with tqdm(total=ceil(len(train_dataset)/batch_size), desc='train', unit='batch') as pbar:
@@ -58,6 +59,9 @@ def train_epoch(model, tokenizer, train_dataset, optimizer, scheduler, batch_siz
             total_loss += loss.item()
             pbar.update(1)
 
+            sample_processed += len(sentiment)
+            pbar.set_postfix(loss= total_loss/sample_processed, accuracy= correct_count/sample_processed)
+
     return correct_count / len(train_dataset), total_loss / len(train_dataset)
 
 
@@ -68,6 +72,7 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
 
     correct_count = 0
     total_loss = 0
+    sample_processed = 0
     y_pred = list()
     y_true = list()
 
@@ -87,6 +92,9 @@ def eval_epoch(model, tokenizer, eval_dataset, batch_size, split):
                 correct_count += (preds == sentiment).sum().item()
                 total_loss += loss.item()
                 pbar.update(1)
+
+                sample_processed += len(sentiment)
+                pbar.set_postfix(loss= total_loss/sample_processed, accuracy= correct_count/sample_processed)
 
     metrics_score = evaluation_metrics(y_true, y_pred, split=split)
     return correct_count / len(eval_dataset), total_loss / len(eval_dataset), metrics_score
