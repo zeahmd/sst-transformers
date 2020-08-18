@@ -146,7 +146,7 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
                     f"{test_evaluation_metrics['test_confusion_matrix']}")
 
         logger.info(f"Total training time elapsed: {timedelta(seconds=total_train_seconds)}")
-        logger.info(f"Mean time per epoch: {timedelta(seconds=(total_train_seconds/epoch+1))}")
+        logger.info(f"Mean time per epoch: {timedelta(seconds=total_train_seconds/(epoch+1))}")
 
         #save best model and delete previous ones...
         if save:
