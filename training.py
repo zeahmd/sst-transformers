@@ -166,4 +166,5 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
 
         if stopping_step >= patience:
             logger.info("EarlyStopping!")
+            os._exit(1)
 
