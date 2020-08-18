@@ -83,12 +83,5 @@ def load_transformer(name, binary):
             config.num_labels = 5
         return {'model': MobileBertForSequenceClassification.from_pretrained('google/mobilebert-uncased', config=config),
                 'tokenizer': MobileBertTokenizer.from_pretrained('google/mobilebert-uncased')}
-    elif name == 'gpt2-medium':
-        config = GPT2Config.from_pretrained('gpt2-medium')
-        if not binary:
-            config.num_labels = 5
-        return {
-            'model': GPT2LMHeadModel.from_pretrained('gpt2-medium', config=config),
-            'tokenizer': GPT2Tokenizer.from_pretrained("gpt2-medium")}
     else:
         raise ValueError
