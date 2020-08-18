@@ -9,6 +9,8 @@ from math import ceil
 from loguru import logger
 import numpy as np
 import os
+import time
+from datetime import timedelta
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -120,9 +122,13 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
     stopping_step = 0
     best_model_name = None
 
+    total_train_seconds = 0
     for epoch in range(epochs):
 
+        start = time.time()
         train_acc, train_loss = train_epoch(model, tokenizer, train_dataset, optimizer, batch_size)
+        end = time.time()
+        total_train_seconds += (end - start)
         logger.info(f"epoch: {epoch+1}, transformer: {name}, train_loss: {train_loss:.4f}, train_acc: {train_acc*100:.2f}")
 
         dev_acc, dev_loss, _ = eval_epoch(model, tokenizer, dev_dataset, batch_size, 'dev')
@@ -138,6 +144,8 @@ def train(name, root, binary, epochs=25, patience=3, save=False):
                     f"test_accuracy_score: {test_evaluation_metrics['test_accuracy']*100:.2f}")
         logger.info(f"epoch: {epoch+1}, transformer: {name}, test_confusion_matrix: \n"
                     f"{test_evaluation_metrics['test_confusion_matrix']}")
+
+        logger.info(f"Total training time elapsed: {timedelta(seconds=total_train_seconds)}")
 
 
         #save best model and delete previous ones...
