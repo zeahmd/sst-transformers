@@ -5,7 +5,8 @@ from transformers import AlbertTokenizer, AlbertForSequenceClassification, Alber
 from transformers import XLMRobertaTokenizer, XLMRobertaForSequenceClassification, XLMRobertaConfig
 from transformers import ElectraTokenizer, ElectraForSequenceClassification, ElectraConfig
 from transformers import MobileBertTokenizer, MobileBertForSequenceClassification, MobileBertConfig
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, GPT2Config
+from transformers import LongformerTokenizer, LongformerForSequenceClassification, LongformerConfig
+from transformers import XLNetTokenizer, XLNetForSequenceClassification, XLNetConfig
 from loguru import logger
 
 def load_transformer(name, binary):
@@ -83,5 +84,33 @@ def load_transformer(name, binary):
             config.num_labels = 5
         return {'model': MobileBertForSequenceClassification.from_pretrained('google/mobilebert-uncased', config=config),
                 'tokenizer': MobileBertTokenizer.from_pretrained('google/mobilebert-uncased')}
+    elif name == 'longformer-base':
+        config = LongformerConfig.from_pretrained('allenai/longformer-base-4096')
+        if not binary:
+            config.num_labels = 5
+        return {
+            'model': LongformerForSequenceClassification.from_pretrained('allenai/longformer-base-4096', config=config),
+            'tokenizer': LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')}
+    elif name == 'longformer-large':
+        config = LongformerConfig.from_pretrained('allenai/longformer-large-4096')
+        if not binary:
+            config.num_labels = 5
+        return {
+            'model': LongformerForSequenceClassification.from_pretrained('allenai/longformer-large-4096', config=config),
+            'tokenizer': LongformerTokenizer.from_pretrained('allenai/longformer-large-4096')}
+    elif name == 'xlnet-base':
+        config = XLNetConfig.from_pretrained('xlnet-base-cased')
+        if not binary:
+            config.num_labels = 5
+        return {
+            'model': XLNetForSequenceClassification.from_pretrained('xlnet-base-cased', config=config),
+            'tokenizer': XLNetTokenizer.from_pretrained('xlnet-base-cased')}
+    elif name == 'xlnet-large':
+        config = XLNetConfig.from_pretrained('xlnet-large-cased')
+        if not binary:
+            config.num_labels = 5
+        return {
+            'model': XLNetForSequenceClassification.from_pretrained('xlnet-large-cased', config=config),
+            'tokenizer': XLNetTokenizer.from_pretrained('xlnet-large-cased')}
     else:
         raise ValueError

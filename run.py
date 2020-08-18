@@ -30,7 +30,8 @@ def run(name, root, binary, epochs, patience, save):
     10- electra-small
     11- electra-large
     12- mobilebert
-    13- gpt2-medium
+    13- longformer-large
+    14- xlnet-large
 
     \b
     Dataset Details:
