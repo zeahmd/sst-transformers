@@ -5,7 +5,7 @@ from transformers import AlbertTokenizer, AlbertForSequenceClassification, Alber
 from transformers import XLMRobertaTokenizer, XLMRobertaForSequenceClassification, XLMRobertaConfig
 from transformers import ElectraTokenizer, ElectraForSequenceClassification, ElectraConfig
 from transformers import MobileBertTokenizer, MobileBertForSequenceClassification, MobileBertConfig
-from transformers import GPT2Tokenizer, GPT2Model, GPT2Config
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, GPT2Config
 from loguru import logger
 
 def load_transformer(name, binary):
@@ -83,5 +83,12 @@ def load_transformer(name, binary):
             config.num_labels = 5
         return {'model': MobileBertForSequenceClassification.from_pretrained('google/mobilebert-uncased', config=config),
                 'tokenizer': MobileBertTokenizer.from_pretrained('google/mobilebert-uncased')}
+    elif name == 'gpt2-medium':
+        config = GPT2Config.from_pretrained('gpt2-medium')
+        if not binary:
+            config.num_labels = 5
+        return {
+            'model': GPT2LMHeadModel.from_pretrained('gpt2-medium', config=config),
+            'tokenizer': GPT2Tokenizer.from_pretrained("gpt2-medium")}
     else:
         raise ValueError
