@@ -1,10 +1,11 @@
 
 
 def get_binary_label(sentiment):
-    if sentiment <= 1:
+    if sentiment < 2:
         return 0
-    else:
+    if sentiment > 2:
         return 1
+    raise ValueError("Invalid sentiment")
 
 
 def transformer_params(name):
