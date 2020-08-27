@@ -36,7 +36,7 @@ class SSTDataset(object):
             if binary:
                 for tree in sst:
                     for subtree in tree.to_labeled_lines():
-                        if subtree[0] != 0:
+                        if subtree[0] != 2:
                             self.text.append(
                                 preprocess_sst(subtree[1])
                             )
