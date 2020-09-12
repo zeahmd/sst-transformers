@@ -4,9 +4,7 @@ from transformers import DistilBertTokenizer, DistilBertForSequenceClassificatio
 from transformers import AlbertTokenizer, AlbertForSequenceClassification, AlbertConfig
 from transformers import XLMRobertaTokenizer, XLMRobertaForSequenceClassification, XLMRobertaConfig
 from transformers import ElectraTokenizer, ElectraForSequenceClassification, ElectraConfig
-from transformers import MobileBertTokenizer, MobileBertForSequenceClassification, MobileBertConfig
-from transformers import LongformerTokenizer, LongformerForSequenceClassification, LongformerConfig
-from transformers import XLNetTokenizer, XLNetForSequenceClassification, XLNetConfig
+from transformers import BartTokenizer, BartForSequenceClassification, BartConfig
 from loguru import logger
 
 def load_transformer(name, binary):
@@ -41,76 +39,29 @@ def load_transformer(name, binary):
             config.num_labels = 5
         return {'model': DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', config=config),
                 'tokenizer': DistilBertTokenizer.from_pretrained('distilbert-base-uncased')}
-    elif name == 'albert-xlarge':
-        config = AlbertConfig.from_pretrained('albert-xlarge-v2')
+    elif name == 'albert-base-v2':
+        config = AlbertConfig.from_pretrained('albert-base-v2')
         if not binary:
             config.num_labels = 5
-        return {'model': AlbertForSequenceClassification.from_pretrained('albert-xlarge-v2', config=config),
-                'tokenizer': AlbertTokenizer.from_pretrained('albert-xlarge-v2')}
-    elif name == 'albert-xxlarge':
-        config = AlbertConfig.from_pretrained('albert-xxlarge-v2')
-        if not binary:
-            config.num_labels = 5
-        return {'model': AlbertForSequenceClassification.from_pretrained('albert-xxlarge-v2', config=config),
-                'tokenizer': AlbertTokenizer.from_pretrained('albert-xxlarge-v2')}
+        return {'model': AlbertForSequenceClassification.from_pretrained('albert-base-v2', config=config),
+                'tokenizer': AlbertTokenizer.from_pretrained('albert-base-v2')}
     elif name == 'xlmroberta-base':
         config = XLMRobertaConfig.from_pretrained('xlm-roberta-base')
         if not binary:
             config.num_labels = 5
         return {'model': XLMRobertaForSequenceClassification.from_pretrained('xlm-roberta-base', config=config),
                 'tokenizer': XLMRobertaTokenizer.from_pretrained('xlm-roberta-base')}
-    elif name == 'xlmroberta-large':
-        config = XLMRobertaConfig.from_pretrained('xlm-roberta-large')
-        if not binary:
-            config.num_labels = 5
-        return {'model': XLMRobertaForSequenceClassification.from_pretrained('xlm-roberta-large', config=config),
-                'tokenizer': XLMRobertaTokenizer.from_pretrained('xlm-roberta-large')}
     elif name == 'electra-small':
         config = ElectraConfig.from_pretrained('google/electra-small-discriminator')
         if not binary:
             config.num_labels = 5
         return {'model': ElectraForSequenceClassification.from_pretrained('google/electra-small-discriminator', config=config),
                 'tokenizer': ElectraTokenizer.from_pretrained('google/electra-small-discriminator')}
-    elif name == 'electra-large':
-        config = ElectraConfig.from_pretrained('google/electra-large-discriminator')
+    elif name == 'bart-large':
+        config = BartConfig.from_pretrained('facebook/bart-large')
         if not binary:
             config.num_labels = 5
-        return {'model': ElectraForSequenceClassification.from_pretrained('google/electra-large-discriminator',
-                                                                          config=config),
-                'tokenizer': ElectraTokenizer.from_pretrained('google/electra-large-discriminator')}
-    elif name == 'mobilebert':
-        config = MobileBertConfig.from_pretrained('google/mobilebert-uncased')
-        if not binary:
-            config.num_labels = 5
-        return {'model': MobileBertForSequenceClassification.from_pretrained('google/mobilebert-uncased', config=config),
-                'tokenizer': MobileBertTokenizer.from_pretrained('google/mobilebert-uncased')}
-    elif name == 'longformer-base':
-        config = LongformerConfig.from_pretrained('allenai/longformer-base-4096')
-        if not binary:
-            config.num_labels = 5
-        return {
-            'model': LongformerForSequenceClassification.from_pretrained('allenai/longformer-base-4096', config=config),
-            'tokenizer': LongformerTokenizer.from_pretrained('allenai/longformer-base-4096')}
-    elif name == 'longformer-large':
-        config = LongformerConfig.from_pretrained('allenai/longformer-large-4096')
-        if not binary:
-            config.num_labels = 5
-        return {
-            'model': LongformerForSequenceClassification.from_pretrained('allenai/longformer-large-4096', config=config),
-            'tokenizer': LongformerTokenizer.from_pretrained('allenai/longformer-large-4096')}
-    elif name == 'xlnet-base':
-        config = XLNetConfig.from_pretrained('xlnet-base-cased')
-        if not binary:
-            config.num_labels = 5
-        return {
-            'model': XLNetForSequenceClassification.from_pretrained('xlnet-base-cased', config=config),
-            'tokenizer': XLNetTokenizer.from_pretrained('xlnet-base-cased')}
-    elif name == 'xlnet-large':
-        config = XLNetConfig.from_pretrained('xlnet-large-cased')
-        if not binary:
-            config.num_labels = 5
-        return {
-            'model': XLNetForSequenceClassification.from_pretrained('xlnet-large-cased', config=config),
-            'tokenizer': XLNetTokenizer.from_pretrained('xlnet-large-cased')}
+        return {'model': BartForSequenceClassification.from_pretrained('facebook/bart-large', config=config),
+                'tokenizer': BartTokenizer.from_pretrained('facebook/bart-large')}
     else:
         raise ValueError

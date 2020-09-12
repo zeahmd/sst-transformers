@@ -23,15 +23,10 @@ def run(name, root, binary, epochs, patience, save):
     3- roberta-base
     4- roberta-large
     5- distilbert
-    6- albert-xlarge
-    7- albert-xxlarge
-    8- xlmroberta-base
-    9- xlmroberta-large
-    10- electra-small
-    11- electra-large
-    12- mobilebert
-    13- longformer-large
-    14- xlnet-large
+    6- albert-base-v2
+    7- xlmroberta-base
+    8- electra-small
+    9- bart-large
 
     \b
     Dataset Details:
