@@ -10,7 +10,7 @@ def tokenize(text):
     try:
         return nltk.word_tokenize(text)
     except LookupError:
-        nltk.download('punkt')
+        nltk.download("punkt")
         return nltk.word_tokenize(text)
 
 
@@ -28,7 +28,7 @@ def lemmatize(tokens):
             tokens[i] = lemmatizer.lemmatize(tokens[i])
         return tokens
     except LookupError:
-        nltk.download('wordnet')
+        nltk.download("wordnet")
         lemmatizer = WordNetLemmatizer()
 
         for i in range(len(tokens)):
@@ -37,12 +37,6 @@ def lemmatize(tokens):
 
 
 def preprocess_sst(phrase):
-    return ' '.join(
-        lemmatize(
-            remove_token_whitespaces(
-                tokenize(
-                    convert_lowercase(phrase)
-                )
-            )
-        )
+    return " ".join(
+        lemmatize(remove_token_whitespaces(tokenize(convert_lowercase(phrase))))
     )

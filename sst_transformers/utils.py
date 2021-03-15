@@ -1,5 +1,3 @@
-
-
 def get_binary_label(sentiment):
     if sentiment < 2:
         return 0
@@ -9,6 +7,4 @@ def get_binary_label(sentiment):
 
 
 def transformer_params(name):
-    return {'batch_size': 32,
-            'learning_rate': 1e-5}
-
+    return {"batch_size": 32, "learning_rate": 1e-5}
